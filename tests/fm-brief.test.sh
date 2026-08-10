@@ -682,6 +682,14 @@ test_scout_and_secondmate_load_decision_hold_policy() {
     "scout brief did not load the unresolved-decision policy before done"
   assert_grep "pass its shared completion gate for the report and any visual review" "$scout" \
     "scout brief did not cross-reference visual-review completion"
+  assert_grep "$ROOT/.agents/skills/visual-findings-page/SKILL.md" "$scout" \
+    "scout brief did not point a screen-visible finding at the annotated evidence page"
+  # The evidence page and its inputs land beside the report, outside the disposable
+  # worktree, so the rule enumerating what may be written there has to name them.
+  assert_grep "the evidence you leave beside it" "$scout" \
+    "scout brief did not permit writing evidence beside the report"
+  assert_grep "$home/data/sample-investigation/\`, the report" "$scout" \
+    "scout brief did not confine that allowance to the task data directory"
   FM_HOME="$home" FM_ROOT_OVERRIDE="$ROOT" FM_SECONDMATE_CHARTER='sample reviews' \
     "$ROOT/bin/fm-brief.sh" sample-mate --secondmate --no-projects >/dev/null 2>&1
   charter="$home/data/sample-mate/brief.md"
