@@ -185,6 +185,10 @@
       "audience": "agent-runtime"
     },
     {
+      "path": ".agents/skills/visual-findings-page/SKILL.md",
+      "audience": "agent-runtime"
+    },
+    {
       "path": "AGENTS.md",
       "audience": "agent-runtime"
     },
@@ -250,6 +254,14 @@
     },
     {
       "path": "docs/examples/crew-dispatch.json",
+      "audience": "operator-example"
+    },
+    {
+      "path": "docs/examples/visual-findings/connect-screen.png",
+      "audience": "operator-example"
+    },
+    {
+      "path": "docs/examples/visual-findings/findings.json",
       "audience": "operator-example"
     },
     {

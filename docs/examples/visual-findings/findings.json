@@ -1,0 +1,106 @@
+{
+  "title": "Acme Wallet onboarding: two defects on the connect step",
+  "subtitle": "Synthetic worked example for `bin/fm-visual-findings.sh`. The screenshot is a mock page, and every file path below is invented.",
+  "meta": "commit `0000000` (main) · mock build · captured at a 500x844 viewport",
+  "findings": [
+    {
+      "id": "connect-copy",
+      "title": "The connect screen tells the user to tap a button that does not exist",
+      "severity": "cosmetic",
+      "level": "low",
+      "summary": "The paragraph names a **“Proceed to scan”** button. The only button on the screen says **“Get connected”**, and no locale file defines that other label at all.",
+      "screenshot": "connect-screen.png",
+      "alt": "The Acme Wallet connect screen, with the instruction paragraph and the primary button ringed",
+      "caption": "Coordinates came straight from `getBoundingClientRect()` at a 500x844 viewport, which is also the screenshot's pixel size, so no coordinate space had to be declared.",
+      "regions": [
+        {
+          "label": "what the text says",
+          "x": 34,
+          "y": 386,
+          "w": 142,
+          "h": 18,
+          "pad": 8
+        },
+        {
+          "label": "what the button says",
+          "x": 34,
+          "y": 699,
+          "w": 432,
+          "h": 55,
+          "shape": "rect",
+          "pad": 6
+        }
+      ],
+      "evidence": [
+        {
+          "region": 1,
+          "heading": "the instruction",
+          "note": "The onboarding copy sends the user looking for a button by name.",
+          "file": "src/locales/en/connect.json",
+          "line": 41,
+          "code": "\"instruction\": \"If you are ready and understand, tap the\n  “Proceed to scan” button. That opens a scanner\n  where you scan the QR code or enter the URL by hand.\""
+        },
+        {
+          "region": 2,
+          "heading": "the actual button",
+          "note": "Two keys further down the same file, the button is called something else. The label has no branch on connection state, so this is what *every* user sees.",
+          "file": "src/locales/en/connect.json",
+          "line": 43,
+          "code": "\"buttons\": { \"primary\": \"Get connected\" }"
+        },
+        {
+          "heading": "and nothing else defines the other label",
+          "body": [
+            {
+              "code": "src/locales/en/connect.json:41:  \"instruction\": \"... tap the “Proceed to scan” button ...\"\n(1 match, in prose only)",
+              "caption": "grep -rn \"Proceed to scan\" src/locales/"
+            },
+            {
+              "text": "**“Proceed to scan” appears in no button key, in any locale file.** It reads as a rename that left the paragraph behind."
+            }
+          ]
+        }
+      ],
+      "confidence": "high",
+      "verdict": "Real but cosmetic, and the kind of thing that may already be known upstream. Worth a one-line copy fix, not worth blocking a release."
+    },
+    {
+      "id": "duplicate-test-ids",
+      "title": "Both connect-step inputs ship the same test id",
+      "severity": "test integrity",
+      "level": "medium",
+      "summary": "Nothing is visibly wrong on screen, which is exactly why this needs the code rather than a screenshot: the selector resolves to two elements and every assertion silently reads the first one.",
+      "evidence": [
+        {
+          "heading": "the duplicate",
+          "body": [
+            {
+              "code": "<Input data-testid=\"connect-url-input\" value={url} onChange={setUrl} />\n<Input data-testid=\"connect-url-input\" value={alias} onChange={setAlias} />",
+              "file": "src/pages/Connect/ManualEntry.tsx",
+              "line": "88-96"
+            },
+            {
+              "text": "Both fields were copied from the same block and kept the same identifier. Two things follow:"
+            },
+            {
+              "bullets": [
+                "**`getByTestId` throws** on multiple matches, so the selector is unusable as written.",
+                "**`getAllByTestId` silently succeeds**, which is what the existing test does, so the hole stays invisible."
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "what the test then proves",
+          "note": "The assertion takes index 0, so the alias field is never exercised and a regression in it cannot fail this suite.",
+          "file": "src/pages/Connect/ManualEntry.test.tsx",
+          "line": 34,
+          "code": "const [field] = screen.getAllByTestId(\"connect-url-input\");\nexpect(field).toHaveValue(\"https://agent.example\");"
+        }
+      ],
+      "confidence": "high",
+      "verdict": "Substantive: it is a hole in the test suite rather than a visible bug, so it will not surface on its own until something breaks in the untested field."
+    }
+  ],
+  "footer": "This page is generated from `findings.json` beside it: `bin/fm-visual-findings.sh docs/examples/visual-findings/findings.json`."
+}
