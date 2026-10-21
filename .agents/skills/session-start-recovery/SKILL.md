@@ -37,7 +37,9 @@ The locked startup inactive-outcome scan joins that worker so a slow local curre
 
 Bootstrap detects first, asks for consent, and installs only after the captain approves in the current session.
 Do not dispatch until the essential launch tools are present and GitHub authentication is good; presentation availability follows `bootstrap-diagnostics` and does not block nonvisual work.
-Use `gh-axi` for GitHub, `chrome-devtools-axi` for browser work, and compatible `lavish-axi` for visual decisions or reports; consult current help rather than memorizing flags.
+Use `gh-axi` for GitHub, `playwright-cli` for browser work (`chrome-devtools-axi` only for CPU or network throttling, performance tracing, or attaching to an existing Chrome), and compatible `lavish-axi` for visual decisions or reports; consult current help rather than memorizing flags.
+Start each `playwright-cli` session with `PLAYWRIGHT_MCP_ALLOW_UNRESTRICTED_FILE_ACCESS=true PLAYWRIGHT_MCP_OUTPUT_DIR="$(mktemp -d)"` in front of `playwright-cli -s=<name> open ...` so `file:` URLs load and its snapshots stay out of the working directory.
+Its `playwright-cli` skill is installed user-level for Claude (`playwright-cli install --skills claude --global`), so load it where the harness has it.
 A silent bootstrap section needs no action; for any printed actionable diagnostic line, load `bootstrap-diagnostics` and follow its owner procedure.
 `BOOTSTRAP_INFO:` lines are completed no-action facts and do not require loading a skill.
 `secondmate-provisioning` owns startup secondmate sync, liveness, and inherited local-material convergence.

@@ -236,8 +236,15 @@ test_forge_selection_renders_correct_cli() {
   FM_HOME="$home" "$ROOT/bin/fm-brief.sh" brief-forge-default some-proj --mode direct-PR >/dev/null 2>&1 \
     || fail "a ship brief with no --forge should still scaffold"
   brief="$home/data/brief-forge-default/brief.md"
-  assert_grep "3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations." "$brief" \
-    "a brief with no --forge must render the exact pre-existing gh-axi Rule 3 line"
+  assert_grep "3. Use gh-axi for GitHub operations. Use playwright-cli for browser operations" "$brief" \
+    "a brief with no --forge must render the gh-axi forge clause followed by the playwright-cli browser clause in Rule 3"
+  assert_grep "chrome-devtools-axi only for CPU or network throttling, performance tracing, or attaching to an existing Chrome." "$brief" \
+    "Rule 3 must keep chrome-devtools-axi only for the work playwright-cli cannot do"
+  # shellcheck disable=SC2016 # The command substitution is literal generated brief text.
+  assert_grep 'PLAYWRIGHT_MCP_ALLOW_UNRESTRICTED_FILE_ACCESS=true PLAYWRIGHT_MCP_OUTPUT_DIR="$(mktemp -d)"' "$brief" \
+    "Rule 3 must give the playwright-cli session env that allows file: URLs and moves its output out of the worktree"
+  assert_no_grep "chrome-devtools-axi for browser operations" "$brief" \
+    "Rule 3 must no longer make chrome-devtools-axi the browser tool"
   # shellcheck disable=SC2016 # Backticks are literal generated brief text.
   assert_grep 'open a PR with `gh-axi`' "$brief" \
     "a direct-PR brief with no --forge must still tell the worker to open the PR with gh-axi"
@@ -247,7 +254,7 @@ test_forge_selection_renders_correct_cli() {
   FM_HOME="$home" "$ROOT/bin/fm-brief.sh" brief-forge-forgejo some-proj --mode direct-PR --forge forgejo >/dev/null 2>&1 \
     || fail "--forge forgejo should scaffold a direct-PR ship brief"
   brief="$home/data/brief-forge-forgejo/brief.md"
-  assert_grep "3. Use tea for Forgejo operations and chrome-devtools-axi for browser operations." "$brief" \
+  assert_grep "3. Use tea for Forgejo operations. Use playwright-cli for browser operations" "$brief" \
     "--forge forgejo must render the tea Rule 3 line"
   # shellcheck disable=SC2016 # Backticks are literal generated brief text.
   assert_grep 'open a PR with `tea`' "$brief" \
@@ -268,7 +275,7 @@ test_forge_selection_renders_correct_cli() {
   FM_HOME="$home" "$ROOT/bin/fm-brief.sh" brief-forge-nm some-proj --mode no-mistakes --forge forgejo >/dev/null 2>&1 \
     || fail "--forge forgejo should scaffold a no-mistakes ship brief"
   brief="$home/data/brief-forge-nm/brief.md"
-  assert_grep "3. Use tea for Forgejo operations and chrome-devtools-axi for browser operations." "$brief" \
+  assert_grep "3. Use tea for Forgejo operations. Use playwright-cli for browser operations" "$brief" \
     "a no-mistakes --forge forgejo brief must render the tea Rule 3 line"
   grep -qx "Delivery contract: mode=no-mistakes forge=forgejo" "$brief" \
     || fail "a no-mistakes --forge forgejo brief must mark the delivery contract line"
@@ -603,6 +610,8 @@ test_ask_user_escalation_format() {
   other_brief="$home/data/$other_id/brief.md"
   assert_no_grep "destructive actions, ask-user findings" "$other_brief" \
     "scout brief received a no-mistakes-only decision case"
+  assert_grep "3. Use gh-axi for GitHub operations. Use playwright-cli for browser operations" "$other_brief" \
+    "a scout brief must render the playwright-cli browser clause in Rule 3"
 
   for mode in direct-PR local-only; do
     other_id="brief-no-ask-user-$(printf '%s' "$mode" | tr '[:upper:]' '[:lower:]')"

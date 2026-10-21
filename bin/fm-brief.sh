@@ -217,6 +217,13 @@ BRANCH_PREFIX=fm/
 BRANCH_PREFIX_SET=0
 BASE_BRANCH=
 BASE_BRANCH_SET=0
+# Browser-tool clause of every scaffold's Rule 3. playwright-cli is the default;
+# chrome-devtools-axi keeps only the work playwright-cli cannot do. playwright-cli
+# blocks file: URLs unless allowUnrestrictedFileAccess is set and writes snapshots
+# and logs into ./.playwright-cli/ of its working directory, and its own
+# PLAYWRIGHT_MCP_* env vars fix both for a session when set on the `open` command.
+# shellcheck disable=SC2016 # The backticks and command substitution are literal brief text.
+BROWSER_RULE='Use playwright-cli for browser operations (its `playwright-cli` skill, when your harness has it, or `playwright-cli --help` documents the commands) and chrome-devtools-axi only for CPU or network throttling, performance tracing, or attaching to an existing Chrome. Start each playwright-cli session with `PLAYWRIGHT_MCP_ALLOW_UNRESTRICTED_FILE_ACCESS=true PLAYWRIGHT_MCP_OUTPUT_DIR="$(mktemp -d)"` in front of `playwright-cli -s=<name> open ...` so file: URLs load and its snapshots stay out of the worktree.'
 FORGE=none
 FORGE_SET=0
 SHAPE=
@@ -323,11 +330,11 @@ if [ "$KIND" = ship ]; then
   # forge-CLI rule names it instead of gh-axi; an external review tool has no
   # forge CLI at all; every other forge keeps gh-axi.
   if [ "$FORGE" = forgejo ]; then
-    FORGE_RULE_LINE="Use tea for Forgejo operations and chrome-devtools-axi for browser operations."
+    FORGE_RULE_LINE="Use tea for Forgejo operations. $BROWSER_RULE"
   elif [ "$FORGE" = external ]; then
-    FORGE_RULE_LINE="Publish only through the review tool your Definition of done names, and use chrome-devtools-axi for browser operations."
+    FORGE_RULE_LINE="Publish only through the review tool your Definition of done names. $BROWSER_RULE"
   else
-    FORGE_RULE_LINE="Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations."
+    FORGE_RULE_LINE="Use gh-axi for GitHub operations. $BROWSER_RULE"
   fi
 elif [ "$FORGE_SET" -eq 1 ] || [ "$SHAPE_SET" -eq 1 ]; then
   echo "error: --forge and --shape apply only to ship briefs; a scout delivers a report and a secondmate charter is not a delivery contract" >&2
@@ -703,7 +710,7 @@ The report is the only thing that survives, so anything worth keeping must be in
 # Rules
 1. Never push to any remote and never open a PR.
 2. Stay inside this worktree; the only files you may write outside it are the report and the status file below.
-3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
+3. Use gh-axi for GitHub operations. $BROWSER_RULE
 4. Report status by appending one line:
    \`$STATUS_APPEND\`
    States: working, needs-decision, blocked, $PAUSED_VERB, done, failed.

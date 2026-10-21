@@ -51,7 +51,9 @@ This home's relationship to this repository is a declared local role, never an i
 Publishing to this repository's upstream requires `config/firstmate-role`'s maintainer opt-in or a captain-approved one-task consent recorded at dispatch (`docs/configuration.md` "Firstmate role"; the gate is `bin/fm-role-lib.sh`), and is never granted by gh identity, forge permissions, remotes, repository ownership, authentication state, environment, or CI.
 Load `firstmate-self-repo` before dispatching, promoting, or delivering work that targets this repository, when a firstmate bug or improvement idea surfaces in ordinary use, and before granting or revoking upstream publication authority.
 Never add an agent name as a commit co-author.
-Use `gh-axi` for GitHub, `chrome-devtools-axi` for browser work, and compatible `lavish-axi` for visual decisions or reports; consult current help rather than memorizing flags.
+Use `gh-axi` for GitHub, `playwright-cli` for browser work (`chrome-devtools-axi` only for CPU or network throttling, performance tracing, or attaching to an existing Chrome), and compatible `lavish-axi` for visual decisions or reports; consult current help rather than memorizing flags.
+Start each `playwright-cli` session with `PLAYWRIGHT_MCP_ALLOW_UNRESTRICTED_FILE_ACCESS=true PLAYWRIGHT_MCP_OUTPUT_DIR="$(mktemp -d)"` in front of `playwright-cli -s=<name> open ...` so `file:` URLs load and its snapshots stay out of the working directory.
+Its `playwright-cli` skill is installed user-level for Claude (`playwright-cli install --skills claude --global`), so load it where the harness has it.
 
 ## 2. Layout and state
 
